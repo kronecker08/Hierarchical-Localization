@@ -1,7 +1,16 @@
 torch
+tensorflow-gpu==1.12
 numpy
 opencv-python
 tqdm
 matplotlib
 scipy
 h5py
+pyyaml
+flake8
+jupyter
+matplotlib
+protobuf
+sklearn
+pillow
+deepdish
