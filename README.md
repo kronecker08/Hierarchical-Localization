@@ -32,6 +32,8 @@ We also provide a Docker image that includes COLMAP and other dependencies:
 docker build -t hloc:latest .
 docker run -it --rm -p 9999:9999 --gpus '"device=1,2"'  hloc:latest  # for GPU support, add `--runtime=nvidia`
 jupyter notebook --ip 0.0.0.0 --port 9999 --no-browser --allow-root
+## NetVLAD weights
+wget http://rpg.ifi.uzh.ch/datasets/netvlad/vd16_pitts30k_conv5_3_vlad_preL2_intra_white.zip
 ```
 
 
