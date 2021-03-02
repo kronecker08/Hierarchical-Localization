@@ -13,3 +13,7 @@ protobuf
 sklearn
 pillow
 deepdish
+scikit-image
+keras==2.0.8
+imgaug
+pycocotoolss

@@ -5,7 +5,7 @@
 import os
 import sys
 import random
-import math
+import maths
 import numpy as np
 import skimage.io
 import matplotlib
@@ -17,19 +17,19 @@ from pathlib import Path
 import Mask_RCNN.model as modellib
 from Mask_RCNN import utils
 from Mask_RCNN import coco
-COCO_MODEL_PATH = Path("/home/Mask_RCNN/mask_rcnn_coco.h5")
-MODEL_DIR = Path("/home/Mask_RCNN/logs")
+COCO_MODEL_PATH = Path("/home/Hierarchical-Localization/Mask_RCNN/mask_rcnn_coco.h5")
+MODEL_DIR = Path("/home/Hierarchical-Localization/Mask_RCNN/logs")
 
 
 # Load a random image from the images folder
-os.environ["CUDA_VISIBLE_DEVICES"] = '4'
+os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 class Model_RCNN:
     def __init__(self):
-        print("Initilaized RCNN")
-        print("GPU 4")
+#         print("Initilaized RCNN")
+#         print("GPU 0")
         self.model_create()  
     def model_create(self):
-        with tf.device('/GPU:4'):
+        with tf.device('/GPU:0'):
             class InferenceConfig(coco.CocoConfig):
             # Set batch size to 1 since we'll be running inference on
             # one image at a time. Batch size = GPU_COUNT * IMAGES_PER_GPU
@@ -67,7 +67,7 @@ class Model_RCNN:
         w = r["masks"][:,:,self.indexs]
         w_new = np.sum(w, axis = 2)
         w_new = w_new[...,np.newaxis]
-        dilation_size =15 ## hyper parameter
+#         dilation_size =15 ## hyper parameter
         print("dilation_size_is ",dilation_size)
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2*dilation_size+1, 2*dilation_size+1), (dilation_size, dilation_size))
         w_new = cv2.dilate(w_new.astype(np.uint8), kernel)

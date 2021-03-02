@@ -72,6 +72,7 @@ def pose_from_cluster(qname, qinfo, db_ids, db_images, points3D,
     idxs = list(kp_idx_to_3D.keys())
     mkp_idxs = [i for i in idxs for _ in kp_idx_to_3D[i]]
     mkpq = kpq[mkp_idxs]
+    mkpq = mkpq.astype('float64') 
     mkpq += 0.5  # COLMAP coordinates
 
     mp3d_ids = [j for i in idxs for j in kp_idx_to_3D[i]]
