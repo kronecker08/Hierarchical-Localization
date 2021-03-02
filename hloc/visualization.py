@@ -4,6 +4,7 @@ import random
 import cv2
 import numpy as np
 import pickle
+import h5py
 
 from .utils.read_write_model import read_images_binary, read_points3d_binary
 from .utils.viz import plot_images, plot_keypoints, plot_matches, cm_RdGn
@@ -141,6 +142,97 @@ def visualize_loc(results, image_dir, sfm_model=None, top_k_db=2,
 
             plot_images([q_image, db_image], dpi=dpi)
             plot_matches(kp_q, kp_db, color, a=0.1)
+            fig = plt.gcf()
+            fig.text(
+                0.01, 0.99, text, transform=fig.axes[0].transAxes,
+                fontsize=15, va='top', ha='left', color='k',
+                bbox=dict(fc=(1, 1, 1, 0.5), edgecolor=(0, 0, 0, 0)))
+            fig.text(
+                0.01, 0.01, q, transform=fig.axes[0].transAxes,
+                fontsize=5, va='bottom', ha='left', color='w')
+            fig.text(
+                0.01, 0.01, db_name, transform=fig.axes[1].transAxes,
+                fontsize=5, va='bottom', ha='left', color='w')
+def visualize_loc_new(results, image_dir, image_dir_query, feature_file_map, feature_file_query,sfm_model=None, top_k_db=2,
+                  selected=[], n=1, seed=0, prefix=None, dpi=75):
+    assert image_dir.exists()
+    assert feature_file_map.exists()
+    assert feature_file_query.exists()
+    file_feature_query = h5py.File(str(feature_file_query), 'r')
+    file_feature_map = h5py.File(str(feature_file_map), 'r')
+    
+
+    with open(str(results)+'_logs.pkl', 'rb') as f:
+        logs = pickle.load(f)
+
+    if not selected:
+        queries = list(logs['loc'].keys())
+        if prefix:
+            queries = [q for q in queries if q.startswith(prefix)]
+        selected = random.Random(seed).sample(queries, n)
+
+    is_sfm = sfm_model is not None
+    if is_sfm:
+        assert sfm_model.exists()
+        images = read_images_binary(sfm_model / 'images.bin')
+        points3D = read_points3d_binary(sfm_model / 'points3D.bin')
+
+    for q in selected:
+        q_image = read_image(image_dir_query / q)
+        loc = logs['loc'][q]
+        inliers = np.array(loc['PnP_ret']['inliers'])
+        mkp_q = loc['keypoints_query']
+
+        n = len(loc['db'])
+        if is_sfm:
+            # for each pair of query keypoint and its matched 3D point,
+            # we need to find its corresponding keypoint in each database image
+            # that observes it. We also count the number of inliers in each.
+            kp_idxs, kp_to_3D_to_db = loc['keypoint_index_to_db']
+            counts = np.zeros(n)
+            dbs_kp_q_db = [[] for _ in range(n)]
+            inliers_dbs = [[] for _ in range(n)]
+            for i, (inl, (p3D_id, db_idxs)) in enumerate(zip(inliers,
+                                                             kp_to_3D_to_db)):
+                p3D = points3D[p3D_id]
+                for db_idx in db_idxs:
+                    counts[db_idx] += inl
+                    kp_db = p3D.point2D_idxs[
+                        p3D.image_ids == loc['db'][db_idx]][0]
+                    dbs_kp_q_db[db_idx].append((i, kp_db))
+                    inliers_dbs[db_idx].append(inl)
+        else:
+            # for inloc the database keypoints are already in the logs
+            assert 'keypoints_db' in loc
+            assert 'indices_db' in loc
+            counts = np.array([
+                np.sum(loc['indices_db'][inliers] == i) for i in range(n)])
+
+        # display the database images with the most inlier matches
+        db_sort = np.argsort(-counts)
+        for db_idx in db_sort[:top_k_db]:
+            if is_sfm:
+                db = images[loc['db'][db_idx]]
+                db_name = db.name
+                db_kp_q_db = np.array(dbs_kp_q_db[db_idx])
+                kp_q = mkp_q[db_kp_q_db[:, 0]]
+                kp_db = db.xys[db_kp_q_db[:, 1]]
+                inliers_db = inliers_dbs[db_idx]
+            else:
+                db_name = loc['db'][db_idx]
+                kp_q = mkp_q[loc['indices_db'] == db_idx]
+                kp_db = loc['keypoints_db'][loc['indices_db'] == db_idx]
+                inliers_db = inliers[loc['indices_db'] == db_idx]
+
+            db_image = read_image(image_dir / db_name)
+            color = cm_RdGn(inliers_db).tolist()
+            text = f'inliers: {sum(inliers_db)}/{len(inliers_db)}'
+
+            plot_images([q_image, db_image], dpi=dpi)
+            keypoints_query = file_feature_query[q]["keypoints"].__array__()
+            keypoints_image = file_feature_map[db_name]["keypoints"].__array__()
+            plot_keypoints([keypoints_query,keypoints_image] )
+            plot_matches(kp_q, kp_db, color,ps=10 ,a=0.5)
             fig = plt.gcf()
             fig.text(
                 0.01, 0.99, text, transform=fig.axes[0].transAxes,
