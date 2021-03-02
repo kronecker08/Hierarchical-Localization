@@ -44,6 +44,8 @@ def import_features(image_ids, database_path, features_path):
 
     for image_name, image_id in tqdm(image_ids.items()):
         keypoints = hfile[image_name]['keypoints'].__array__()
+        if keypoints.dtype == 'int32':  ## because from hfnet is int32 
+            keypoints = keypoints.astype('float64')
         keypoints += 0.5  # COLMAP origin
         db.add_keypoints(image_id, keypoints)
 
