@@ -21,27 +21,7 @@ RUN apt-get update && apt-get install -y \
     libglew-dev \
     qtbase5-dev \
     libqt5opengl5-dev \
-    libcgal-dev \RUN cd colmap && \
-    git checkout dev && \
-    mkdir build && \
-    cd build && \
-    cmake .. && \
-    make -j4 && \
-    make install
-
-RUN apt-get update -y
-RUN apt-get install python3 python3-pip unzip wget -y
-WORKDIR /home
-
-RUN pip3 install --upgrade pip
-RUN pip3 install jupyterlab notebook
-RUN pip3 install git+https://github.com/mihaidusmanu/pycolmap
-RUN git clone -b combination https://github.com/kronecker08/Hierarchical-Localization.git
-RUN cd Hierarchical-Localization && git submodule update --init --recursive
-WORKDIR /home/Hierarchical-Localization
-RUN pip3 install -r requirements.txt
-RUN bash weight.sh
-
+    libcgal-dev \
     libcgal-qt5-dev
 
 # Build and install ceres solver
@@ -88,4 +68,5 @@ RUN cd Hierarchical-Localization && git submodule update --init --recursive
 WORKDIR /home/Hierarchical-Localization
 RUN pip3 install -r requirements.txt
 RUN bash weight.sh
+
 
