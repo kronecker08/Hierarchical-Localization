@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     git \
     cmake \
     vim \
+    nan0 \
     build-essential \
     libboost-program-options-dev \
     libboost-filesystem-dev \
@@ -68,5 +69,3 @@ RUN cd Hierarchical-Localization && git submodule update --init --recursive
 WORKDIR /home/Hierarchical-Localization
 RUN pip3 install -r requirements.txt
 RUN bash weight.sh
-
-
