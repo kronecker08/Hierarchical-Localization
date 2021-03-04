@@ -16,4 +16,3 @@ deepdish
 scikit-image
 keras==2.0.8
 imgaug
-pycocotoolss
