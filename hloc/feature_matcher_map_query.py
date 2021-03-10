@@ -38,7 +38,7 @@ confs = {
 
 
 @torch.no_grad()
-def main(conf, pairs, features, export_dir, query_features=None, output_dir=None, exhaustive=False):
+def main(conf, pairs, features, export_dir, query_features=None, output_dir=None, exhaustive=False, self= False):
     logging.info('Matching local features with configuration:'
                  f'\n{pprint.pformat(conf)}')
 
@@ -95,9 +95,10 @@ def main(conf, pairs, features, export_dir, query_features=None, output_dir=None
         pair = names_to_pair(name0, name1)
 
         # Avoid to recompute duplicates to save time
-        if len({(name0, name1), (name1, name0)} & matched) \
-                or pair in match_file:
-            continue
+        if self == False:
+            if len({(name0, name1), (name1, name0)} & matched) \
+                    or pair in match_file:
+                continue
 
         data = {}
         feats0, feats1 = query_feature_file[name0], feature_file[name1]
