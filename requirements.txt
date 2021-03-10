@@ -1,4 +1,4 @@
-torch
+torch==1.7.1
 numpy
 opencv-python
 tqdm
@@ -16,4 +16,3 @@ deepdish
 scikit-image
 keras==2.0.8
 imgaug
-pycocotoolss
