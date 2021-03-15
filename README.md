@@ -17,25 +17,54 @@ With `hloc`, you can:
 ##
 
 ## Installation
+`follow the instructions`
+- Step 1 – ssh into the server​
 
-`hloc` requires Python >=3.6, PyTorch >=1.1, and [COLMAP](https://colmap.github.io/index.html). Other minor dependencies are listed in `requirements.txt`.  For pose estimation, we use [pycolmap](https://github.com/mihaidusmanu/pycolmap), which can be installed as:
+	ssh into the server with port forwarding​
 
-```
-pip install git+https://github.com/mihaidusmanu/pycolmap
-```
+	ssh -L 7777:localhost:7777 username@50.234.182.178  ​
 
-This codebase includes external local features as git submodules – don't forget to pull submodules with `git submodule update --init --recursive`. Your local features are based on TensorFlow? No problem! See [below](#using-your-own-local-features-or-matcher) for the steps.
+	Change port number and username ​
 
-We also provide a Docker image that includes COLMAP and other dependencies:
+- Step 2 – build a docker image​
 
-```
-docker build -t hloc:latest .
-docker run -it --rm -p 9999:9999 --gpus '"device=1,2"'  hloc:latest  # for GPU support, add `--runtime=nvidia`
-jupyter notebook --ip 0.0.0.0 --port 9999 --no-browser --allow-root
-## NetVLAD weights
-wget http://rpg.ifi.uzh.ch/datasets/netvlad/vd16_pitts30k_conv5_3_vlad_preL2_intra_white.zip
-```
+	Copy the contents of Dockerfile​
 
+	Save it the content in a file named Dockerfile→ nano Dockerfile → paste the content​
+
+	docker build -t “image_name”  .​
+
+- Step 3 – create a container ​
+
+	docker run -it --name “container_name” --gpus '"device=0"'  -p 7777:7777 “image_name”​
+
+- Step 4 – Launch Jupyter notebook​
+
+	nano Jupyter_notebook.sh change the port number inside it ​
+
+	bash Jupyter_notebook.sh​
+
+	Copy the token and paste it in a browser​
+
+## Useful Scripts (Localizing T4 in T3)​
+
+1. Trajectory3_Robot_Lab_NetVLAD.ipynb --> NETVLAD, Superpoint and Superglue​
+
+2. Trajectory3_Robot_Lab_HF_NET.ipynb --> HFNET and Superglue​
+
+3. Image_adder.ipynb --> this is useful for image augmentation ​
+
+4. images_masker.ipynb --> MaskRCNN has been configured to mask out people, 2 function – masking by blacking and mask output​
+
+5. Localize_in_mask.ipynb --> takes an extra input as mask which is used to drop out keypoints in that area​
+ 
+6. Image_Single.ipynb --> this localizes a single image using NETVLAD, Superpoint and Superglue ​
+
+      Takes mask also as input and gives comparison between the masked and occlusion
+
+## New dataset Domain Lab (every 3rd image to create the map and every fourth for localization)
+1. data_splitter.ipynb to split to dataset
+2. data_new_skip3.ipynb ​to run the pipeline
 
 
 ## General pipeline
